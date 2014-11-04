@@ -18,8 +18,8 @@ Simply add your books the 'books' folder.
 
 Name the second version with an appended ", 2" like so: 
 
-. Dickins - A Tale of Two Cities.html
-. Dickins - A Tale of Two Cities, 2.html
+*  Dickins - A Tale of Two Cities.html
+*  Dickins - A Tale of Two Cities, 2.html
 
 Then run the app.js script again and view the report.html file.
 
