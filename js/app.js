@@ -3,8 +3,6 @@
 
   ng.module('bookdiff', ['ngFileReader'])
   
-  //.constant('jsdiff', diff )
-
   .controller('MainCtrl', ['$scope', '$q', function($scope, $q){
     $scope.log = [];
     $scope.books = [];
@@ -22,7 +20,7 @@
           , book1 = $scope.books.length > 0 ? $scope.books[0].content : ''
           , book2 = $scope.books.length > 1 ? $scope.books[1].content : '';
       
-      log.push({ msg: '= Wait for results =', color: 'black' });
+      log.push({ msg: '= Results =', color: 'black' });
       
       var diffArray = diff.diffWords(book1, book2);
 
@@ -33,8 +31,14 @@
           var c = chunk.added ? 'green' :
                   chunk.removed ? 'red' : 'grey';
           log.push({ msg: chunk.value, color: c });
-        }, function(){ //Final
-          console.log('Done!');
+          cb();
+        }, function(err){ //Final
+          if(err) {
+            console.log('Something went wrong');
+          } else {
+            $scope.disableCompareButton = false;
+            console.log('Done!');
+          }
       });
     };
     
