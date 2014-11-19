@@ -3,7 +3,7 @@
 
   ng.module('bookdiff', ['ngFileReader'])
   
-  .controller('MainCtrl', ['$scope', '$q', function($scope, $q){
+  .controller('MainCtrl', ['$scope', '$q', '$timeout', function($scope, $q, $timeout){
     $scope.log = [];
     $scope.books = [];
     $scope.disableCompareButton = false;
@@ -20,26 +20,32 @@
           , book1 = $scope.books.length > 0 ? $scope.books[0].content : ''
           , book2 = $scope.books.length > 1 ? $scope.books[1].content : '';
       
-      log.push({ msg: '= Results =', color: 'black' });
+      log.push({ msg: '= Wait for results =', color: 'black' });
       
-      var diffArray = diff.diffWords(book1, book2);
+      $timeout(
+        function() {
+          return diff.diffWords(book1, book2);
+        }, 500)
+      .then(function(diffArray){
+        console.log('Differences: ', diffArray.length);
 
-      console.log('Differences: ', diffArray.length);
-      
-      async.each(diffArray,
-        function(chunk, cb){ //Iterator
-          var c = chunk.added ? 'green' :
-                  chunk.removed ? 'red' : 'grey';
-          log.push({ msg: chunk.value, color: c });
-          cb();
-        }, function(err){ //Final
-          if(err) {
-            console.log('Something went wrong');
-          } else {
-            $scope.disableCompareButton = false;
-            console.log('Done!');
-          }
+        async.each(diffArray,
+          function(chunk, cb){ //Iterator
+            var c = chunk.added ? 'green' :
+                    chunk.removed ? 'red' : 'grey';
+            log.push({ msg: chunk.value, color: c });
+            cb();
+          }, function(err){ //Final
+            if(err) {
+              console.log('Something went wrong');
+            } else {
+              console.log('Done!');
+            }
+        });
+      }).finally(function(){
+        $scope.disableCompareButton = false;
       });
+
     };
     
     $scope.loadFile = function(e, file, index){
