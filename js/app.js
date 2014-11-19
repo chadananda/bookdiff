@@ -51,8 +51,10 @@
     $scope.loadFile = function(e, file, index){
       var ext = file.name.split('.').pop(),
           tcontent = ext.indexOf('htm') === 0 
-                        ? ng.element(e.target.result).filter(':not(style,title,script)').text() // Heads Up! I'm NOT using jQlite
-                        : e.target.result;    
+            ? ng.element(e.target.result.replace(/src=/g,'data-src=')).filter(':not(style,title,script,meta,link)').text() // Heads Up! I'm NOT using jQlite
+            : e.target.result;   
+            
+      //console.log(tcontent);
       $scope.books[index] = { name: file.name, content: tcontent };      
       console.log("[", index, "] Input readed ", file.name);
       
