@@ -1,4 +1,4 @@
-(function(ng, diff){
+(function(ng, diff, async){
   'use strict';
 
   ng.module('bookdiff', ['ngFileReader'])
@@ -19,28 +19,38 @@
       $scope.disableCompareButton = true;
       
       var log = $scope.log
-          , book1 = $scope.books.length > 0 ? $scope.books[0] : ''
-          , book2 = $scope.books.length > 1 ? $scope.books[1] : '';
+          , book1 = $scope.books.length > 0 ? $scope.books[0].content : ''
+          , book2 = $scope.books.length > 1 ? $scope.books[1].content : '';
       
-      log.push({ msg: 'Starting to compare', color: 'black' });
+      log.push({ msg: '= Wait for results =', color: 'black' });
       
       var diffArray = diff.diffWords(book1, book2);
+
+      console.log('Differences: ', diffArray.length);
       
-      diffArray.forEach(function(chunk, index){
-        var c = chunk.added ? 'green' :
-                chunk.removed ? 'red' : 'grey';
-        log.push({ msg: chunk.value, color: c });
+      async.each(diffArray,
+        function(chunk, cb){ //Iterator
+          var c = chunk.added ? 'green' :
+                  chunk.removed ? 'red' : 'grey';
+          log.push({ msg: chunk.value, color: c });
+        }, function(){ //Final
+          console.log('Done!');
       });
     };
     
     $scope.loadFile = function(e, file, index){
-      $scope.books[index] = e.target.result;
-      console.log("[", index, "] Input readed");
-      console.log("content: ", e.target.result );
+      var ext = file.name.split('.').pop(),
+          tcontent = ext.indexOf('htm') === 0 
+                        ? ng.element(e.target.result).filter(':not(style,title,script)').text() // Heads Up! I'm NOT using jQlite
+                        : e.target.result;    
+      $scope.books[index] = { name: file.name, content: tcontent };      
+      console.log("[", index, "] Input readed ", file.name);
+      
     };
 
   }]);
 })(
   window.angular,
-  window.JsDiff
+  window.JsDiff,
+  window.async
 );
